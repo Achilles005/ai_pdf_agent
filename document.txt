@@ -1,0 +1,236 @@
+Below is a **detailed documentation** for your AI-Powered PDF Question-Answering System:
+
+---
+
+# **AI-Powered PDF Question-Answering System**
+
+This documentation provides an in-depth guide to understanding, setting up, and extending the functionality of the system. It includes architecture details, module breakdowns, workflows, and potential areas for improvement.
+
+---
+
+## **Table of Contents**
+1. [Introduction](#introduction)
+2. [System Architecture](#system-architecture)
+3. [Directory and File Structure](#directory-and-file-structure)
+4. [Setup Guide](#setup-guide)
+5. [Usage Instructions](#usage-instructions)
+6. [Key Workflows](#key-workflows)
+7. [Module Documentation](#module-documentation)
+8. [Evaluation Metrics](#evaluation-metrics)
+9. [Future Enhancements](#future-enhancements)
+10. [FAQs](#faqs)
+
+---
+
+## **1. Introduction**
+
+The AI-Powered PDF Question-Answering System is designed to:
+- Enable users to upload PDFs and ask questions about their content.
+- Use advanced natural language processing (NLP) techniques to retrieve and generate accurate answers.
+- Support integration with platforms like Slack for sharing results.
+
+---
+
+## **2. System Architecture**
+
+The system is composed of several layers:
+
+1. **PDF Processing Layer**:
+   - Extracts and chunks text from the PDF.
+
+2. **Embedding Layer**:
+   - Converts questions and PDF chunks into vector embeddings using transformer models.
+
+3. **Search and Retrieval Layer**:
+   - Uses FAISS (or similar) for vector-based chunk retrieval.
+
+4. **Answer Generation Layer**:
+   - Leverages language models (e.g., OpenAI's GPT or BERT) to generate concise answers.
+
+5. **Integration Layer**:
+   - Provides a user-friendly Streamlit interface.
+   - Posts structured results to Slack.
+
+---
+
+## **3. Directory and File Structure**
+
+```plaintext
+src/
+├── agent.py                       # Core agent for processing questions
+├── build_app.py                   # Initializes and configures app components
+├── embedding_cache.py             # Manages embedding caching
+├── embedding_handler.py           # Handles embedding generation and retrieval
+├── hybrid_search.py               # Implements hybrid search logic (optional)
+├── llm_handler.py                 # Manages language model interactions
+├── logging_config.py              # Configures project-wide logging
+├── pdf_processor.py               # Extracts and processes text from PDFs
+├── query_understanding.py         # Utilities for query understanding
+├── RecursiveCharacterTextSplitter.py  # Splits text into semantic chunks
+├── slack_integration.py           # Sends results to Slack
+├── streamlit_app.py               # Provides the user interface
+├── transformer_embedding_handler.py  # Uses transformer models for embeddings
+```
+
+---
+
+## **4. Setup Guide**
+
+### **Requirements**
+- **Python Version**: Python 3.9+
+- **Libraries**: Listed in `requirements.txt`
+- **External Services**:
+  - OpenAI API key
+  - Slack webhook URL (optional)
+
+### **Installation Steps**
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Achilles005/ai_pdf_agent.git
+   cd ai_pdf_agent
+   ```
+
+2. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. Configure API keys:
+   Create a `config.json` file in the project root:
+   ```json
+   {
+       "openai_api_key": "your-openai-key",
+       "slack_webhook_url": "your-slack-webhook-url"
+   }
+   ```
+
+---
+
+## **5. Usage Instructions**
+
+### **Streamlit Interface**
+1. Start the application:
+   ```bash
+   streamlit run streamlit_app.py
+   ```
+
+2. Open the browser at the displayed URL to:
+   - Upload PDFs.
+   - Enter questions.
+   - View AI-generated answers.
+
+### **Batch Processing**
+Use `build_app.py` for programmatic batch question processing:
+```python
+from build_app import Application
+
+app = Application()
+pdf_path = "data/sample.pdf"
+questions = ["What is the company's name?", "Who is the CEO?"]
+app.process_pdf_and_questions(pdf_path, questions)
+```
+
+---
+
+## **6. Key Workflows**
+
+### **1. PDF Upload and Chunking**
+- **Module**: `pdf_processor.py`, `RecursiveCharacterTextSplitter.py`
+- **Steps**:
+  1. Upload a PDF.
+  2. Extract text using PyPDF2.
+  3. Split text into manageable chunks using semantic-aware splitting.
+
+### **2. Embedding Generation**
+- **Module**: `transformer_embedding_handler.py`
+- **Steps**:
+  1. Convert chunks and questions into embeddings using transformer models.
+  2. Cache embeddings for faster subsequent processing.
+
+### **3. Chunk Retrieval**
+- **Module**: `embedding_handler.py`
+- **Steps**:
+  1. Search for top-k chunks using FAISS.
+  2. Rank chunks based on semantic similarity.
+
+### **4. Answer Generation**
+- **Module**: `llm_handler.py`
+- **Steps**:
+  1. Provide the question and retrieved chunks to the language model.
+  2. Generate and refine answers.
+
+### **5. Deduplication and Formatting**
+- **Module**: `agent.py`
+- **Steps**:
+  1. Filter out contradictory or redundant answers.
+  2. Format the final response into a clean output.
+
+### **6. Slack Integration**
+- **Module**: `slack_integration.py`
+- **Steps**:
+  1. Post structured results to Slack.
+
+---
+
+## **7. Module Documentation**
+
+### **`agent.py`**
+- **Key Methods**:
+  - `process_with_chain_parallel`: Orchestrates the end-to-end question-answering workflow.
+  - `_deduplicate_and_filter_answers`: Removes redundant or contradictory answers.
+
+### **`embedding_handler.py`**
+- **Key Methods**:
+  - `generate_embedding`: Converts text into vector embeddings.
+  - `search`: Retrieves top-k chunks using FAISS.
+
+### **`llm_handler.py`**
+- **Key Methods**:
+  - `generate_answer`: Generates an answer using the language model.
+
+### **`streamlit_app.py`**
+- **Key Functions**:
+  - `run_app`: Launches the Streamlit interface.
+
+---
+
+## **8. Evaluation Metrics**
+- **Precision and Recall**:
+  - Evaluate the system's ability to retrieve relevant chunks.
+- **Confidence Scoring**:
+  - Implement confidence thresholds for filtering low-quality responses.
+- **Latency Metrics**:
+  - Measure response times for embedding generation, chunk retrieval, and answer generation.
+
+---
+
+## **9. Future Enhancements**
+
+### **1. Improved Deduplication**
+- Use advanced semantic comparison techniques to filter redundant answers.
+
+### **2. Parallelized Embedding**
+- Optimize embedding generation for large PDFs by parallel processing.
+
+### **3. Context Chaining**
+- Use document chaining techniques to better link information across multiple chunks.
+
+### **4. Additional Integrations**
+- Extend integration capabilities to platforms like Teams or Discord.
+
+---
+
+## **10. FAQs**
+
+### **1. How does the system handle large PDFs?**
+The system splits large PDFs into smaller chunks using `RecursiveCharacterTextSplitter.py`. These chunks are processed independently.
+
+### **2. Can I use this system without an OpenAI API key?**
+Yes, by using open-source transformer models (e.g., BERT) through `transformer_embedding_handler.py`.
+
+### **3. How do I enable Slack integration?**
+Add your Slack webhook URL in the `config.json` file.
+
+---
+
+Let me know if additional details are needed or if you'd like specific sections expanded! 🚀
